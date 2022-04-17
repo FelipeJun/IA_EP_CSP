@@ -11,8 +11,6 @@ equipe = {
 
 RODADAS = (len(equipe)-1) * 2
 JOGOS = int(len(equipe)/2)
-# Jogos (timex X timey) que ja foram atribuidos à uma rodada
-JOGADOS = []
 
 # gera combinação de todos os jogos
 
@@ -42,13 +40,32 @@ class UmTimePorRodadaRestricao(Restricao):
       if times is not None:
         time1 = times[0]
         time2 = times[1]
-        if (time1 in rodadas[rodada] or time2 in rodadas[rodada] and time2):
+        if (time1 in rodadas[rodada] or time2 in rodadas[rodada]):
           return False
         else:
           rodadas[rodada].append(time1)
           rodadas[rodada].append(time2)
-          JOGADOS.append(times)
     return True
+
+class UmEstadioPorRodada(Restricao):
+  def __init__(self,variaveis):
+    super().__init__(variaveis)
+
+  def esta_satisfeita(self, atribuicao):
+    cidades_rodadas = []
+    for variavel in atribuicao.keys():
+      times = atribuicao[variavel]
+      if times is not None:
+        time1 = times[0]
+        if(len(cidades_rodadas) % JOGOS == 0):
+          cidades_rodadas = []
+        if (equipe[time1]["cidade"] in cidades_rodadas):
+          return False
+        else:
+          cidades_rodadas.append(equipe[time1]["cidade"])
+    return True
+
+
 
 if __name__ == "__main__":
     variaveis = []
@@ -63,9 +80,11 @@ if __name__ == "__main__":
         dominios[variavel] = combinacao_de_todos_jogos
     
     problema = SatisfacaoRestricoes(variaveis, dominios)
-    problema.adicionar_restricao( UmTimePorRodadaRestricao(variaveis) )
-    
+    problema.adicionar_restricao(UmTimePorRodadaRestricao(variaveis))
+    problema.adicionar_restricao(UmEstadioPorRodada(variaveis))
+    print("Vai entrar no backtracking")
     resposta = problema.busca_backtracking()
+    print("Saiu do Backtracking")
     if resposta is None:
       print("Nenhuma resposta encontrada")
     else:
