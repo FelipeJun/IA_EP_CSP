@@ -6,9 +6,9 @@ equipe = {
   "CA Protetores": {"cidade": "Guardião", "torcedores": 20},
   "SE Leões": {"cidade": "Leão", "torcedores": 40},
   "Simba FC": {"cidade": "Leão", "torcedores": 15},
-  # "SE Granada": {"cidade": "Granada", "torcedores": 10}
-  "Porto EC": {"cidade": "Porto", "torcedores": 45}
-  # "SE Escondidos": {"cidade": "Escondidos", "torcedores": 50}
+  "SE Granada": {"cidade": "Granada", "torcedores": 10}, 
+  "Porto EC": {"cidade": "Porto", "torcedores": 45},
+  "SE Escondidos": {"cidade": "Escondidos", "torcedores": 50}
 }
 
 RODADAS = (len(equipe)-1) * 2
@@ -78,7 +78,7 @@ class UmClassicoPorRodada(Restricao):
     rodada = list(atribuicao.keys())[-1]
     rodada = rodada[0:2]
     jogosRodada = [x for x in list(atribuicao.keys()) if x.__contains__(rodada)]
-    eClassico = False
+    eClassico = 0
     
     for variavel in jogosRodada:
       times = atribuicao[variavel]
@@ -87,7 +87,9 @@ class UmClassicoPorRodada(Restricao):
         time2 = times[1]
       if not eClassico:
         if (equipe[time1]["torcedores"] >= 38 and equipe[time2]["torcedores"] >= 38):
-          eClassico = True
+          eClassico += 1
+    return eClassico >= 2 if False else True 
+        
 
 
 
@@ -106,6 +108,7 @@ if __name__ == "__main__":
     problema = SatisfacaoRestricoes(variaveis, dominios)
     problema.adicionar_restricao(UmTimePorRodadaRestricao(variaveis))
     # problema.adicionar_restricao(UmEstadioPorRodada(variaveis))
+    problema.adicionar_restricao(UmClassicoPorRodada(variaveis))
     resposta = problema.busca_backtracking()
     if resposta is None:
       print("Nenhuma resposta encontrada")
