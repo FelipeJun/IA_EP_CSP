@@ -5,8 +5,10 @@ equipe = {
   "Guardiões FC": {"cidade": "Guardião", "torcedores": 40},
   "CA Protetores": {"cidade": "Guardião", "torcedores": 20},
   "SE Leões": {"cidade": "Leão", "torcedores": 40},
-   "Simba FC": {"cidade": "Leão", "torcedores": 15},
-  "SE Granada": {"cidade": "Granada", "torcedores": 10}
+  "Simba FC": {"cidade": "Leão", "torcedores": 15},
+  # "SE Granada": {"cidade": "Granada", "torcedores": 10}
+  "Porto EC": {"cidade": "Porto", "torcedores": 45}
+  # "SE Escondidos": {"cidade": "Escondidos", "torcedores": 50}
 }
 
 RODADAS = (len(equipe)-1) * 2
@@ -28,23 +30,21 @@ class UmTimePorRodadaRestricao(Restricao):
 
   # atribuicao = {"variavel1": "valor1", "variavel2": "valor2", ...}
   def esta_satisfeita(self, atribuicao):
-    rodadas = {}
-    for i in range(RODADAS): # rodadas
-      rodadas["R" + str(i)] = []
+    rodada = list(atribuicao.keys())[-1]
+    rodada = rodada[0:2]
+    jogosRodada = [x for x in list(atribuicao.keys()) if x.__contains__(rodada)]
+    rodadas = []
 
-    # Sempre verifica TODOS os jogos. Exemplo: Caso o backtracking esteja vendo o R0J1, aqui
-    # SEMPRE estara vendo o R0J0
-    for variavel in atribuicao.keys():
-      rodada = variavel[0:2]
+    for variavel in jogosRodada:
       times = atribuicao[variavel]
       if times is not None:
         time1 = times[0]
         time2 = times[1]
-        if (time1 in rodadas[rodada] or time2 in rodadas[rodada]):
+        if (time1 in rodadas or time2 in rodadas):
           return False
         else:
-          rodadas[rodada].append(time1)
-          rodadas[rodada].append(time2)
+          rodadas.append(time1)
+          rodadas.append(time2)
     return True
 
 class UmEstadioPorRodada(Restricao):
@@ -53,17 +53,41 @@ class UmEstadioPorRodada(Restricao):
 
   def esta_satisfeita(self, atribuicao):
     cidades_rodadas = []
-    for variavel in atribuicao.keys():
+    rodada = list(atribuicao.keys())[-1]
+    rodada = rodada[0:2]
+    jogosRodada = [x for x in list(atribuicao.keys()) if x.__contains__(rodada)]
+
+    for variavel in jogosRodada:
       times = atribuicao[variavel]
       if times is not None:
         time1 = times[0]
+
         if(len(cidades_rodadas) % JOGOS == 0):
           cidades_rodadas = []
+
         if (equipe[time1]["cidade"] in cidades_rodadas):
           return False
         else:
           cidades_rodadas.append(equipe[time1]["cidade"])
     return True
+
+class UmClassicoPorRodada(Restricao):
+  def __init__(self,variaveis):
+    super().__init__(variaveis)
+  def esta_satisfeita(self, atribuicao):
+    rodada = list(atribuicao.keys())[-1]
+    rodada = rodada[0:2]
+    jogosRodada = [x for x in list(atribuicao.keys()) if x.__contains__(rodada)]
+    eClassico = False
+    
+    for variavel in jogosRodada:
+      times = atribuicao[variavel]
+      if times is not None:
+        time1 = times[0]
+        time2 = times[1]
+      if not eClassico:
+        if (equipe[time1]["torcedores"] >= 38 and equipe[time2]["torcedores"] >= 38):
+          eClassico = True
 
 
 
@@ -81,10 +105,8 @@ if __name__ == "__main__":
     
     problema = SatisfacaoRestricoes(variaveis, dominios)
     problema.adicionar_restricao(UmTimePorRodadaRestricao(variaveis))
-    problema.adicionar_restricao(UmEstadioPorRodada(variaveis))
-    print("Vai entrar no backtracking")
+    # problema.adicionar_restricao(UmEstadioPorRodada(variaveis))
     resposta = problema.busca_backtracking()
-    print("Saiu do Backtracking")
     if resposta is None:
       print("Nenhuma resposta encontrada")
     else:
@@ -93,4 +115,4 @@ if __name__ == "__main__":
         print("\n---------- Rodada " + str(i+1) + " ----------\n")
         for j in range(JOGOS): # jogos
           jogo = resposta["R" + str(i) + "J" + str(j)]
-          print("Jogo " + str(j+1) + ": " + jogo[0] + " x " + jogo[1] + "\tCidade: " + equipe[jogo[0]]["cidade"])
+          print("Jogo " + str(j+1) + ": " + jogo[0] + " x " + jogo[1] + "\nCidade: " + equipe[jogo[0]]["cidade"] + "\n")
