@@ -62,9 +62,6 @@ class UmEstadioPorRodada(Restricao):
       if times is not None:
         time1 = times[0]
 
-        if(len(cidades_rodadas) % JOGOS == 0):
-          cidades_rodadas = []
-
         if (equipe[time1]["cidade"] in cidades_rodadas):
           return False
         else:
@@ -107,7 +104,7 @@ if __name__ == "__main__":
     problema = SatisfacaoRestricoes(variaveis, dominios)
     problema.adicionar_restricao(UmTimePorRodadaRestricao(variaveis))
     problema.adicionar_restricao(UmEstadioPorRodada(variaveis))
-    problema.adicionar_restricao(UmClassicoPorRodada(variaveis))
+    # problema.adicionar_restricao(UmClassicoPorRodada(variaveis))
     resposta = problema.busca_backtracking()
     if resposta is None:
       print("Nenhuma resposta encontrada")
