@@ -1,12 +1,12 @@
 from satisfacao_restricoes import Restricao, SatisfacaoRestricoes
 
 equipe = {
-  "Campos FC": {"cidade": "Campos", "torcedores": 23},
+  # "Campos FC": {"cidade": "Campos", "torcedores": 23},
   "Guardiões FC": {"cidade": "Guardião", "torcedores": 40},
-  "CA Protetores": {"cidade": "Guardião", "torcedores": 20},
   "SE Leões": {"cidade": "Leão", "torcedores": 40},
+  "CA Protetores": {"cidade": "Guardião", "torcedores": 20},
   "Simba FC": {"cidade": "Leão", "torcedores": 15},
-  "SE Granada": {"cidade": "Granada", "torcedores": 10}, 
+  # "SE Granada": {"cidade": "Granada", "torcedores": 10},
   "Porto EC": {"cidade": "Porto", "torcedores": 45},
   "SE Escondidos": {"cidade": "Escondidos", "torcedores": 50}
 }
@@ -85,14 +85,13 @@ class UmClassicoPorRodada(Restricao):
       if times is not None:
         time1 = times[0]
         time2 = times[1]
-      if not eClassico:
-        if (equipe[time1]["torcedores"] >= 38 and equipe[time2]["torcedores"] >= 38):
-          eClassico += 1
-    return eClassico >= 2 if False else True 
+      if (equipe[time1]["torcedores"] >= 38 and equipe[time2]["torcedores"] >= 38):
+        eClassico += 1
+    if eClassico >= 2:
+      return False
+    else:
+      return True
         
-
-
-
 if __name__ == "__main__":
     variaveis = []
     for i in range(RODADAS): # rodadas
@@ -107,7 +106,7 @@ if __name__ == "__main__":
     
     problema = SatisfacaoRestricoes(variaveis, dominios)
     problema.adicionar_restricao(UmTimePorRodadaRestricao(variaveis))
-    # problema.adicionar_restricao(UmEstadioPorRodada(variaveis))
+    problema.adicionar_restricao(UmEstadioPorRodada(variaveis))
     problema.adicionar_restricao(UmClassicoPorRodada(variaveis))
     resposta = problema.busca_backtracking()
     if resposta is None:
